@@ -20,5 +20,5 @@ def make_request(url):
 while True:
     with concurrent.futures.ThreadPoolExecutor() as executor:
         executor.map(make_request,URLS)
-    time_to_wait = 5 #in seconds
+    time_to_wait = 600 #in seconds 600s = 10m 
     time.sleep(time_to_wait)
