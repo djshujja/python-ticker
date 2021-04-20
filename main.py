@@ -2,6 +2,7 @@ import concurrent.futures
 import requests 
 import random
 import time
+import sqlite3
 
 PROXY_LIST = [
     "209.127.138.225:7322",
@@ -17,18 +18,21 @@ PROXY_LIST = [
 ]
 
 TICKERS = [
-    'FB',
-    'CLOV',
-    'COIN',
-    'TSLA',
-    'AAPL'
+    "CLOV", "COIN", "TSLA", "AAPL", "IZEA", "HCMC", "AMD", "BABA", "PTON", "SWRM", "NIO", "RECAF", "AMZN",
+    "AMC", "PLTR", "DIS", "SPY", "NFLX", "MARA", "BFT", "FB", "GME", "MSFT", "RIOT", "CCIV", "EEENF", "EBON",
+    "NVDA", "BBKCF", "RIDE", "SEGI", "ADHC", "PLUG", "OPEN", "DSCR", "TWTR", "DKNG", "SNAP", "WTII",
+    "GOOG", "SQ", "BNGO", "QQQ", "SNDL", "PLX", "SOS", "ARDX", "NNDM", "AABB"
 ]
 
 proxy_username = "ajawmmid-dest"
 proxy_password = "qenukfdjm32h"
 
-def make_request(ticker):
 
+
+
+def make_request(ticker):
+    conn = sqlite3.connect('test_db.db')
+    c = conn.cursor()
     host_port = random.choice(PROXY_LIST)
     proxies = {
     "http": f"http://{proxy_username}:{proxy_password}@{host_port}",
@@ -39,12 +43,16 @@ def make_request(ticker):
     r = requests.get(str(url),proxies=proxies)
     res = r.json()
     watchlist_count = res['symbol']['watchlist_count']
-    print(f"{ticker}:{watchlist_count}")
-    print(f"Time: {time.time()}")
+    print(f"{ticker}:{watchlist_count} -- Time: {time.time()}")
+    query = f"INSERT INTO tickers VALUES('{ticker}', '{watchlist_count}', '{time.time()}')"
+    c.execute(query)
+    conn.commit()
+    conn.close()
+
     
     
 while True:
     with concurrent.futures.ThreadPoolExecutor() as executor:
         executor.map(make_request,TICKERS)
-    time_to_wait = 600 #in seconds 600s = 10m 
+    time_to_wait = 300 #in seconds 600s = 10m 
     time.sleep(time_to_wait)
