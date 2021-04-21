@@ -2,7 +2,7 @@ import concurrent.futures
 import requests 
 import random
 import time
-import sqlite3
+from sqlite3worker import Sqlite3Worker
 
 PROXY_LIST = [
     "209.127.138.225:7322",
@@ -28,31 +28,27 @@ proxy_username = "ajawmmid-dest"
 proxy_password = "qenukfdjm32h"
 
 
-
+sql_worker = Sqlite3Worker('test_db.db')
 
 def make_request(ticker):
-    conn = sqlite3.connect('test_db.db')
-    c = conn.cursor()
     host_port = random.choice(PROXY_LIST)
     proxies = {
     "http": f"http://{proxy_username}:{proxy_password}@{host_port}",
     "https": f"http://{proxy_username}:{proxy_password}@{host_port}"
     }
-
     url = f'https://api.stocktwits.com/api/2/streams/symbol/{ticker}.json?since=9999999999'
     r = requests.get(str(url),proxies=proxies)
     res = r.json()
     watchlist_count = res['symbol']['watchlist_count']
+    
     print(f"{ticker}:{watchlist_count} -- Time: {time.time()}")
     query = f"INSERT INTO tickers VALUES('{ticker}', '{watchlist_count}', '{time.time()}')"
-    c.execute(query)
-    conn.commit()
-    conn.close()
+    sql_worker.execute(query)
+    
 
-    
-    
 while True:
     with concurrent.futures.ThreadPoolExecutor() as executor:
-        executor.map(make_request,TICKERS)
-    time_to_wait = 300 #in seconds 600s = 10m 
+        x = executor.map(make_request,TICKERS)
+        print(x)
+    time_to_wait = 600 #in seconds 600s = 10m 
     time.sleep(time_to_wait)
