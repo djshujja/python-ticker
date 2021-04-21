@@ -20,9 +20,10 @@ c = conn.cursor()
 # # c.execute(query)
 # conn.commit()
 
-c.execute("SELECT * FROM tickers")
+# c.execute("SELECT * FROM tickers")
+c.execute("DELETE FROM tickers")
 
-print(c.fetchall())
+# print(c.fetchall())
 
 conn.commit()
 
