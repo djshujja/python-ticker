@@ -46,27 +46,9 @@ def make_request(ticker):
     sql_worker.execute(query)
     
 
-
-def simple_req():
-    for ticker in TICKERS:
-        host_port = random.choice(PROXY_LIST)
-        proxies = {
-        "http": f"http://{proxy_username}:{proxy_password}@{host_port}",
-        "https": f"http://{proxy_username}:{proxy_password}@{host_port}"
-        }
-        url = f'https://api.stocktwits.com/api/2/streams/symbol/{ticker}.json?since=9999999999'
-        r = requests.get(str(url),proxies=proxies)
-        res = r.json()
-        watchlist_count = res['symbol']['watchlist_count']
-        
-        print(f"{ticker}:{watchlist_count} -- Time: {time.time()}")
-        query = f"INSERT INTO tickers VALUES('{ticker}', '{watchlist_count}', '{time.time()}')"
-        sql_worker.execute(query)
-    
-    
 while True:
     with concurrent.futures.ThreadPoolExecutor() as executor:
         x = executor.map(make_request,TICKERS)
         print(x)
-    time_to_wait = 30 #in seconds 600s = 10m 
+    time_to_wait = 600 #in seconds 600s = 10m 
     time.sleep(time_to_wait)
